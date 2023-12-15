@@ -1,0 +1,315 @@
+module ProjSimp(
+    input [17:0] SW,
+    input [3:0] KEY,
+    input CLOCK_50,
+	 output reg [7:0] LEDG,
+    output reg [6:0] HEX0, 
+	 output reg [6:0] HEX1, 
+	 output reg [6:0] HEX2, 
+	 output reg [6:0] HEX3, 
+	 output reg [6:0] HEX4, 
+	 output reg [6:0] HEX5, 
+	 output reg [6:0] HEX6,
+	 output reg [6:0] HEX7
+    );
+	
+	always @(*) begin
+		if (SW[0] == 1) begin
+			LEDG[0] = 1;
+		end else begin
+			LEDG[0] = 0;
+		end
+		if (SW[1] == 1) begin
+			LEDG[1] = 1;
+		end else begin
+			LEDG[1] = 0;
+		end
+ 	end
+	
+	reg [24:0] count;
+	
+	parameter [5:0] IDLE = 8'b00001;
+	parameter [5:0] select1 = 8'b00010;
+	parameter [5:0] check1 = 8'b00011;
+	parameter [5:0] select2 = 8'b00100;
+	parameter [5:0] check2 = 8'b00101;
+	parameter [5:0] select3 = 8'b00110;
+	parameter [5:0] check3 = 8'b00111;
+	parameter [5:0] select4 = 8'b01000;
+	parameter [5:0] check4 = 8'b01001;
+	parameter [5:0] select5 = 8'b01010;
+	parameter [5:0] check5 = 8'b01011;
+	parameter [5:0] select6 = 8'b01100;
+	parameter [5:0] check6 = 8'b01101;
+	parameter [5:0] select7 = 8'b01110;
+	parameter [5:0] check7 = 8'b01111;
+	parameter [5:0] lose = 8'b10000;
+	parameter [5:0] win = 8'b10001;
+
+	reg [5:0] s;
+	reg [5:0] ns;
+	
+	always @(posedge CLOCK_50 or negedge KEY[0]) begin
+		if (KEY[0] == 1) begin
+			s <= IDLE;
+		end else begin
+			s <= ns;
+		end
+	end
+
+	always @(posedge CLOCK_50 or negedge SW[0]) begin
+		if (count < 50000000 * 3) begin
+		 count <= count + 1;
+		 ns <= s;
+		end else begin
+			// Next state logic
+			case (s)
+				IDLE: if (SW[1] == 1) begin
+							ns <= select1;
+						end else begin
+							ns <= IDLE;
+						end
+					
+				select1: ns <= check1;
+			
+				check1: 	if (SW[0] == 0) begin
+								ns <= select2;
+							end else begin
+								ns <= lose;
+							end
+						
+				select2: ns <= check2;
+			
+				check2: if (SW[0] == 0) begin
+								ns <= select3;
+							end else begin
+								ns <= lose;
+							end
+						
+				select3: ns <= check3;
+			
+				check3: if (SW[0] == 1) begin
+								ns <= select4;
+							end else begin
+								ns <= lose;
+							end
+						
+				select4: ns <= check4;
+			
+				check4: if (SW[0] == 1) begin
+								ns <= select5;
+							end else begin
+								ns <= lose;
+							end
+						
+				select5: ns <= check5;
+			
+				check5: if (SW[0] == 0) begin
+								ns <= select6;
+							end else begin
+								ns <= lose;
+							end
+						
+				select6: ns <= check6;
+			
+				check6: if (SW[0] == 0) begin
+								ns <= select7;
+							end else begin
+								ns <= lose;
+							end
+						
+				select7: ns <= check7;
+			
+				check7: if (SW[0] == 1) begin
+								ns <= win;
+							end else begin
+								ns <= lose;
+							end
+			
+				lose: ns <= lose;
+			
+				win: ns <= win;
+			
+				default: ns  = IDLE;
+			
+			endcase
+		end
+	end
+	
+	always @(*) begin
+		if (s == IDLE) begin
+			// 1111110 TOP
+			// 1110111 BOTTOM
+			HEX6 = 7'b1110111;
+			HEX5 = 7'b1110111;
+			HEX4 = 7'b1111110;
+			HEX3 = 7'b1111110;
+			HEX2 = 7'b1110111;
+			HEX1 = 7'b1110111;
+			HEX0 = 7'b1111110;
+		end if (s == select1) begin
+			
+			if (SW[0] == 0) begin
+							HEX7 = 7'b1110111;
+							
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 1) begin
+							HEX7 = 7'b1111110;
+							
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select2) begin
+			
+			if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select3) begin
+			
+			if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select4) begin
+			
+			if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select5) begin
+			
+			if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select6) begin
+			
+			if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == select7) begin
+			
+			if (SW[0] == 1) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end if (SW[0] == 0) begin
+							HEX6 = 7'b1110111;
+							HEX5 = 7'b1110111;
+							HEX4 = 7'b1111110;
+							HEX3 = 7'b1111110;
+							HEX2 = 7'b1110111;
+							HEX1 = 7'b1110111;
+							HEX0 = 7'b1111110;
+			end
+			
+		end if (s == lose) begin
+			HEX7 = 7'b1111110;
+			HEX6 = 7'b1111110;
+			HEX5 = 7'b1111110;
+			HEX4 = 7'b1111110;
+			HEX3 = 7'b1111110;
+			HEX2 = 7'b1111110;
+			HEX1 = 7'b1111110;
+			HEX0 = 7'b1111110;
+		end if (s == win) begin
+			HEX7 = 7'b1110111;
+			HEX6 = 7'b1110111;
+			HEX5 = 7'b1110111;
+			HEX4 = 7'b1110111;
+			HEX3 = 7'b1110111;
+			HEX2 = 7'b1110111;
+			HEX1 = 7'b1110111;
+			HEX0 = 7'b1110111;
+		end
+	end
+
+endmodule
